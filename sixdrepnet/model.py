@@ -9,7 +9,7 @@ import utils
 class SixDRepNet(nn.Module):
     def __init__(self,
                  backbone_name, backbone_file, deploy,
-                 pretrained=True):
+                 pretrained=True, export=False):
         super(SixDRepNet, self).__init__()
         repvgg_fn = get_RepVGG_func_by_name(backbone_name)
         backbone = repvgg_fn(deploy)
@@ -32,8 +32,14 @@ class SixDRepNet(nn.Module):
         fea_dim = last_channel
 
         self.linear_reg = nn.Linear(fea_dim, 6)
+        self.mean = torch.tensor([0.485, 0.456, 0.406], dtype=torch.float, device="cuda")
+        self.std = torch.tensor([0.229, 0.224, 0.225], dtype=torch.float, device="cuda")
+        self.export = export
 
     def forward(self, x):
+        if self.export:
+            x = (x.float() / 255 - self.mean) / self.std
+            x = x.permute(0, 3, 1, 2)
         x = self.layer0(x)
         x = self.layer1(x)
         x = self.layer2(x)
@@ -42,7 +48,10 @@ class SixDRepNet(nn.Module):
         x = self.gap(x)
         x = torch.flatten(x, 1)
         x = self.linear_reg(x)
-        return utils.compute_rotation_matrix_from_ortho6d(x)
+        x = utils.compute_rotation_matrix_from_ortho6d(x)
+        if self.export:
+            x = utils.compute_euler_angles_from_rotation_matrices(x)*180/torch.pi
+        return x
 
 
 class SixDRepNet2(nn.Module):

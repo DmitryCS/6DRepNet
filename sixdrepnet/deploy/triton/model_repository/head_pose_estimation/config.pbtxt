@@ -1,0 +1,32 @@
+# --fp16 --minShapes=input:1x224x224x3 --optShapes=input:8x224x224x3 --maxShapes=input:16x224x224x3
+name: "head_pose_estimation"
+platform: "onnxruntime_onnx"
+max_batch_size : 16
+
+input [
+  {
+    name: "input"
+    data_type: TYPE_UINT8
+    dims: [ 224, 224, 3 ]
+  }
+]
+output [
+  {
+    name: "output"
+    data_type: TYPE_FP32
+    dims: [ -1 ]
+  }
+]
+
+model_warmup {
+  name: "warmup"
+  batch_size: 1
+  inputs: {
+    key: "input"
+    value: {
+      data_type: TYPE_UINT8
+      dims: [ 224, 224, 3 ]
+      random_data: True
+    }
+  }
+}

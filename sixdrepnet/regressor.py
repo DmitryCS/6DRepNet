@@ -13,7 +13,7 @@ import utils
 
 class SixDRepNet_Detector():
 
-    def __init__(self, gpu_id : int=0, dict_path: str=''):
+    def __init__(self, gpu_id : int=0, dict_path: str='', export=False):
         """
         Constructs the SixDRepNet instance with all necessary attributes.
 
@@ -29,7 +29,8 @@ class SixDRepNet_Detector():
         self.model = SixDRepNet(backbone_name='RepVGG-B1g2',
                                 backbone_file='',
                                 deploy=True,
-                                pretrained=False)
+                                pretrained=False,
+                                export=export)
         # Load snapshot
         if dict_path=='':
             saved_state_dict = load_state_dict_from_url("https://cloud.ovgu.de/s/Q67RnLDy6JKLRWm/download/6DRepNet_300W_LP_AFLW2000.pth")    
@@ -136,5 +137,3 @@ class SixDRepNet_Detector():
         cv2.line(img, (int(tdx), int(tdy)), (int(x3),int(y3)),(255,0,0),4)
 
         return img
-
-

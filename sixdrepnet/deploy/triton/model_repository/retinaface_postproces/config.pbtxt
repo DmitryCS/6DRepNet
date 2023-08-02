@@ -1,0 +1,69 @@
+name: "retinaface_postproces"
+platform: "pytorch_libtorch"
+
+max_batch_size : 32
+dynamic_batching {
+    preferred_batch_size: [ 8 ]
+    max_queue_delay_microseconds: 10000
+}
+
+input [
+  {
+    name: "INPUT__0"
+    data_type: TYPE_FP32
+    dims: [ 37840, 4 ]
+  },
+  {
+    name: "INPUT__1"
+    data_type: TYPE_FP32
+    dims: [ 37840, 2 ]
+  },
+  {
+    name: "INPUT__2"
+    data_type: TYPE_FP32
+    dims: [ 37840, 10 ]
+  },
+  {
+    name: "INPUT__3"
+    data_type: TYPE_FP32
+    dims: [ 37840, 2 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT__0"
+    data_type: TYPE_FP32
+    dims: [ 100, 4 ]
+  },
+  {
+    name: "OUTPUT__1"
+    data_type: TYPE_FP32
+    dims: [ 100, 2 ]
+  },
+  {
+    name: "OUTPUT__2"
+    data_type: TYPE_FP32
+    dims: [ 100, 10 ]
+  },
+  {
+    name: "OUTPUT__3"
+    data_type: TYPE_FP32
+    dims: [ 100, 2 ]
+  }
+]
+
+#optimization { execution_accelerators {
+#  gpu_execution_accelerator : [ {
+#    name : "tensorrt"
+#    parameters { key: "trt_engine_cache_enable" value: "true" }
+#    parameters { key: "trt_engine_cache_path" value: "/opt/model_cache" }
+#    }]
+#}}
+
+
+parameters: {
+key: "DISABLE_OPTIMIZED_EXECUTION"
+    value: {
+    string_value:"true"
+    }
+}

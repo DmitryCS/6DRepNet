@@ -23,6 +23,23 @@ If you find our work useful, please cite the paper:
   pages={2496-2500},
   doi={10.1109/ICIP46576.2022.9897219}}
 ```
+### Fork Changes
+
+Added export to onnx with pre/postprocess.
+> python3 sixdrepnet/export_onnx.py
+
+Info for **internal usage**:
+1) To work put files with models in deploy/triton/model_repository and run triton server. Then you can infer custom demo:
+> python3 sixdrepnet/detect.py -i ../image.jpg -v ../video.mp4 --infer triton
+2) On 3090 infer speed(conversion trt args [here](./sixdrepnet/deploy/triton/model_repository/head_pose_estimation/config.pbtxt)):<br>
+docker run --rm -it --gpus=all --network=host -v $PWD:/mnt --name triton-client nvcr.io/nvidia/tritonserver:23.06-py3-sdk /bin/bash<br>
+2.1) perf_analyzer -m head_pose_estimation -i grpc --concurrency-range 50<br>
+2.2) perf_analyzer -m head_pose_estimation_trt_fp32 -i grpc --concurrency-range 50<br>
+2.3) perf_analyzer -m head_pose_estimation_trt_fp16 -i grpc --concurrency-range 50<br>
+  Inferences/Second vs. Client Average Batch Latency<br>
+  2.1) Concurrency: 50, throughput: 306.459 infer/sec, latency 162279 usec<br>
+  2.2) Concurrency: 50, throughput: 1351.12 infer/sec, latency 36950 usec<br>
+  2.3) Concurrency: 50, throughput: 4812.81 infer/sec, latency 10383 usec<br>
 ## Updates
 ### 13.09.2022
 * 6DRepNet is now avaiable as pip package for even more accessable usage: *pip3 install SixDRepNet*

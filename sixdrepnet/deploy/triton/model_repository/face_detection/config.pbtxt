@@ -1,0 +1,105 @@
+name: "face_detection"
+platform: "ensemble"
+
+max_batch_size : 32
+
+
+input [
+  {
+    name: "input"
+    data_type: TYPE_FP32
+    dims: [ 720, 1280, 3]
+  }
+]
+output [
+  {
+    name: "locations"
+    data_type: TYPE_FP32
+    dims: [ 100, 4 ]
+  },
+  {
+    name: "confidences"
+    data_type: TYPE_FP32
+    dims: [ 100, 2 ]
+  },
+  {
+    name: "landmarks"
+    data_type: TYPE_FP32
+    dims: [ 100, 10 ]
+  },
+  {
+    name: "masks"
+    data_type: TYPE_FP32
+    dims: [ 100, 2 ]
+  }
+]
+
+ensemble_scheduling {
+  step [
+    {
+      model_name: "retinaface_inference"
+      model_version: 1
+
+      input_map {
+        key: "input"
+        value: "input"
+      }
+
+      output_map {
+        key: "bboxes"
+        value: "output_bboxes"
+      }
+      output_map {
+        key: "scores"
+        value: "output_scores"
+      }
+      output_map {
+        key: "landmarks"
+        value: "output_landmarks"
+      }
+      output_map {
+        key: "covid_masks"
+        value: "output_covid_mask"
+      }
+    },
+    {
+      model_name: "retinaface_postproces"
+      model_version: 1
+
+      input_map {
+        key: "INPUT__0"
+        value: "output_bboxes"
+      }
+      input_map {
+        key: "INPUT__1"
+        value: "output_scores"
+      }
+      input_map {
+        key: "INPUT__2"
+        value: "output_landmarks"
+      }
+      input_map {
+        key: "INPUT__3"
+        value: "output_covid_mask"
+      }
+
+
+      output_map {
+        key: "OUTPUT__0"
+        value: "locations"
+      }
+      output_map {
+        key: "OUTPUT__1"
+        value: "confidences"
+      }
+      output_map {
+        key: "OUTPUT__2"
+        value: "landmarks"
+      }
+      output_map {
+        key: "OUTPUT__3"
+        value: "masks"
+      }
+    }
+  ]
+}
